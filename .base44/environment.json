@@ -1,0 +1,12 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "VITE_APP_TMDB_V3_API_KEY",
+      "description": "TMDB v3 API key used for every movie/TV request. Create one under Settings > API at https://www.themoviedb.org/settings/api",
+      "requiredAtBoot": false
+    }
+  ]
+}
