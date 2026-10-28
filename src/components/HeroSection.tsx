@@ -19,6 +19,7 @@ import {
   useLazyGetAppendedVideosQuery,
 } from "src/store/slices/discover";
 import { Movie } from "src/types/Movie";
+import { useGetConfigurationQuery } from "src/store/slices/configuration";
 import VideoJSPlayer from "./watch/VideoJSPlayer";
 
 interface TopTrailerProps {
@@ -32,8 +33,10 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
     page: 1,
   });
   const [getVideoDetail, { data: detail }] = useLazyGetAppendedVideosQuery();
+  const { data: configuration } = useGetConfigurationQuery(undefined);
   const [video, setVideo] = useState<Movie | null>(null);
   const [muted, setMuted] = useState(true);
+  const [trailerFailed, setTrailerFailed] = useState(false);
   const playerRef = useRef<Player | null>(null);
   const isOffset = useOffSetTop(window.innerWidth * 0.5625);
   const { setDetailType } = useDetailModal();
@@ -43,6 +46,11 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
 
   const handleReady = useCallback((player: Player) => {
     playerRef.current = player;
+    // Some TMDB trailers disallow embedding; fall back to the backdrop artwork.
+    player.on("error", () => {
+      playerRef.current = null;
+      setTrailerFailed(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -109,7 +117,15 @@ export default function TopTrailer({ mediaType }: TopTrailerProps) {
                   position: "absolute",
                 }}
               >
-                {detail && (
+                {trailerFailed && video.backdrop_path && (
+                  <Box
+                    component="img"
+                    src={`${configuration?.images.base_url}w1280${video.backdrop_path}`}
+                    alt={video.title}
+                    sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                )}
+                {detail && !trailerFailed && (
                   <VideoJSPlayer
                     options={{
                       loop: true,

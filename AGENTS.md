@@ -38,8 +38,13 @@ the browser. `vite.config.ts` has no server config; the dev server is started wi
   to `api.themoviedb.org` returning 200, no 401s).
 
 ## Known non-issues
-- A video.js error `CODE:1150 "Playback on other Websites has been disabled by the video
-  owner"` can appear when a hero trailer's YouTube video disallows embedding. That is a
-  TMDB content/trailer restriction, not a setup problem.
+- Some TMDB hero trailers disallow embedding (video.js logs `CODE:1150 "Playback on other
+  Websites has been disabled by the video owner"`). That is a per-trailer YouTube restriction,
+  not a setup problem; `HeroSection.tsx` hides the player on error and shows the TMDB backdrop.
+- `/watch` is a demo player: it streams a public HLS test video (`test-streams.mux.dev`,
+  Big Buck Bunny), not the movie picked on the home page. The previously hardcoded Bitmovin
+  sample URL now returns 403, so "The media could not be loaded" there means the stream URL
+  is dead again — swap in another HLS URL.
+- Browsers block unmuted autoplay, so `/watch` can sit at 0:00 until the user presses play.
 - Poster images are served over `http://image.tmdb.org`; they load fine through the
   preview proxy.
